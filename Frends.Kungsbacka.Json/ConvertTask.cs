@@ -111,7 +111,12 @@ namespace Frends.Kungsbacka.Json
 
 					if (elements.Contains(xmlReader.Name, StringComparer.OrdinalIgnoreCase))
 					{
-						nodeList.Add(doc.ReadNode(xmlReader));
+						var subtree = xmlReader.ReadSubtree();
+						var xmlDoc = new XmlDocument();						
+						xmlDoc.Load(subtree);
+						nodeList.Add(xmlDoc.FirstChild);
+						subtree.Close();
+
 						if (singleElement) break;
 					}
 				}
@@ -124,7 +129,6 @@ namespace Frends.Kungsbacka.Json
 
 			return nodeList;
 		}
-
 		private static void RemoveWhitespaceNodes(IEnumerable<XmlNode> nodeList)
 		{
 			foreach (XmlNode node in nodeList)
@@ -151,7 +155,7 @@ namespace Frends.Kungsbacka.Json
 				{
 					result.Add(node.Name, node.InnerXml);
 
-					if (node.Attributes.Count > 0)
+					if (node.Attributes?.Count > 0)
 					{
                         foreach (XmlAttribute nodeAttribute in node.Attributes)
                         {
