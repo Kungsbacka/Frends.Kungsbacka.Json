@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime;
 using System.Xml;
 
 namespace Frends.Kungsbacka.Json
@@ -41,16 +40,14 @@ namespace Frends.Kungsbacka.Json
 		/// <returns>JToken</returns>
 		public static JToken ConvertXmlBytesToJToken(byte[] xml)
 		{
-			using (var stream = new MemoryStream(xml))
-			{
-				using (var xmlreader = new XmlTextReader(stream))
-				{
-					var doc = new XmlDocument();
-					doc.Load(xmlreader);
-					var jsonString = JsonConvert.SerializeXmlNode(doc);
-					return JToken.Parse(jsonString);
-				}
-			}
+			using var stream = new MemoryStream(xml);
+			using var xmlreader = new XmlTextReader(stream);
+				
+			var doc = new XmlDocument();
+			doc.Load(xmlreader);
+			var jsonString = JsonConvert.SerializeXmlNode(doc);
+			return JToken.Parse(jsonString);
+			
 		}
 
 		/// <summary>
@@ -61,15 +58,10 @@ namespace Frends.Kungsbacka.Json
 		/// <returns>JToken</returns>
 		public static JToken ConvertXmlStringToJTokenXmlReader([PropertyTab] XmlReaderInputString input, [PropertyTab] XmlReaderInputSettings settings)
 		{
-			IEnumerable<XmlNode> result;
-
-			using (var stringReader = new StringReader(input.Xml))
-			{
-				using (var xmlReader = XmlReader.Create(stringReader, XmlReaderSettings(settings.SingleElement, settings.SelectRootElement)))
-				{
-					result = ReadXmlNodes(xmlReader, settings.Elements, settings.SelectRootElement, settings.SingleElement);
-				}
-			}
+			using var stringReader = new StringReader(input.Xml);
+			using var xmlReader = XmlReader.Create(stringReader, XmlReaderSettings(settings.SingleElement, settings.SelectRootElement));
+				
+			var result = ReadXmlNodes(xmlReader, settings.Elements, settings.SelectRootElement, settings.SingleElement);
 
 			if(settings.AsSingleJtoken)
 			{
@@ -87,15 +79,10 @@ namespace Frends.Kungsbacka.Json
 		/// <returns>JToken</returns>
 		public static JToken ConvertXmlBytesToJTokenXmlReader([PropertyTab] XmlReaderInputBytes input, [PropertyTab] XmlReaderInputSettings settings)
 		{
-			IEnumerable<XmlNode> result;
+			using var stream = new MemoryStream(input.Xml);
+			using var xmlReader = XmlReader.Create(stream, XmlReaderSettings(settings.SingleElement, settings.SelectRootElement));
 
-			using (var stream = new MemoryStream(input.Xml))
-			{
-				using (var xmlReader = XmlReader.Create(stream, XmlReaderSettings(settings.SingleElement, settings.SelectRootElement)))
-				{
-					result = ReadXmlNodes(xmlReader, settings.Elements, settings.SelectRootElement, settings.SingleElement);
-				}
-			}
+			var result = ReadXmlNodes(xmlReader, settings.Elements, settings.SelectRootElement, settings.SingleElement);
 
 			if (settings.AsSingleJtoken)
 			{
@@ -106,7 +93,6 @@ namespace Frends.Kungsbacka.Json
 
 			return settings.SingleElement || settings.SelectRootElement ? JToken.FromObject(result.FirstOrDefault()) : JToken.FromObject(result);
 		}
-
 		private static IEnumerable<XmlNode> ReadXmlNodes(XmlReader xmlReader, List<string> elements, bool selectRootElement, bool singleElement)
 		{
 			var doc = new XmlDocument();
