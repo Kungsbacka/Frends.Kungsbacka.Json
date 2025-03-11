@@ -14,7 +14,7 @@ namespace Frends.Kungsbacka.Json.Tests
         {
             // Arrange
             SanitizeCDataSectionsInput input = null;
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
             TestDelegate act = () => JsonTasks.SanitizeCDataSections(input, options);
@@ -27,8 +27,8 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldThrowArgumentNullException_WhenJsonDataIsNull()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput { JsonData = null };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var input = new SanitizeCDataSectionsInput { JsonData = null };
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
             TestDelegate act = () => JsonTasks.SanitizeCDataSections(input, options);
@@ -41,17 +41,17 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldReturnEmptyObject_WhenInputIsEmptyJsonObject()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput
+            var input = new SanitizeCDataSectionsInput
             {
                 JsonData = new JObject()
             };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
-            SanitizeCDataSectionsResult result = JsonTasks.SanitizeCDataSections(input, options);
+            var result = JsonTasks.SanitizeCDataSections(input, options);
 
             // Assert
-            string expected = "{}";
+            var expected = "{}";
             Assert.AreEqual(expected, result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
         }
 
@@ -59,17 +59,17 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldProcessSingleCDataSection()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput
+            var input = new SanitizeCDataSectionsInput
             {
                 JsonData = new JObject { ["#cdata-section"] = "Some value" }
             };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
-            SanitizeCDataSectionsResult result = JsonTasks.SanitizeCDataSections(input, options);
+            var result = JsonTasks.SanitizeCDataSections(input, options);
 
             // Assert
-            string expected = "\"Some value\"";
+            var expected = "\"Some value\"";
             Assert.AreEqual(expected, result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
         }
 
@@ -77,7 +77,7 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldProcessNestedCDataSections()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput
+            var input = new SanitizeCDataSectionsInput
             {
                 JsonData = new JObject
                 {
@@ -87,13 +87,13 @@ namespace Frends.Kungsbacka.Json.Tests
                     }
                 }
             };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
-            SanitizeCDataSectionsResult result = JsonTasks.SanitizeCDataSections(input, options);
+            var result = JsonTasks.SanitizeCDataSections(input, options);
 
             // Assert
-            string expected = "{\"parent\":\"Nested value\"}";
+            var expected = "{\"parent\":\"Nested value\"}";
             Assert.AreEqual(expected, result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
         }
 
@@ -101,7 +101,7 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldProcessArraysWithCDataSections()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput
+            var input = new SanitizeCDataSectionsInput
             {
                 JsonData = new JArray
                 {
@@ -109,13 +109,13 @@ namespace Frends.Kungsbacka.Json.Tests
                     new JObject { ["#cdata-section"] = "Value2" }
                 }
             };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
-            SanitizeCDataSectionsResult result = JsonTasks.SanitizeCDataSections(input, options);
+            var result = JsonTasks.SanitizeCDataSections(input, options);
 
             // Assert
-            string expected = "[\"Value1\",\"Value2\"]";
+            var expected = "[\"Value1\",\"Value2\"]";
             Assert.AreEqual(expected, result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
         }
 
@@ -123,7 +123,7 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldLeaveRegularPropertiesUnchanged()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput
+            var input = new SanitizeCDataSectionsInput
             {
                 JsonData = new JObject
                 {
@@ -131,13 +131,13 @@ namespace Frends.Kungsbacka.Json.Tests
                     ["#cdata-section"] = "Some value"
                 }
             };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
-            SanitizeCDataSectionsResult result = JsonTasks.SanitizeCDataSections(input, options);
+            var result = JsonTasks.SanitizeCDataSections(input, options);
 
             // Assert
-            string expected = "{\"name\":\"John\",\"#cdata-section\":\"Some value\"}";
+            var expected = "{\"name\":\"John\",\"#cdata-section\":\"Some value\"}";
             Assert.AreEqual(expected, result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
         }
 
@@ -145,7 +145,7 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldHandleComplexNestedStructure()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput
+            var input = new SanitizeCDataSectionsInput
             {
                 JsonData = new JObject
                 {
@@ -159,13 +159,13 @@ namespace Frends.Kungsbacka.Json.Tests
                     }
                 }
             };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
-            SanitizeCDataSectionsResult result = JsonTasks.SanitizeCDataSections(input, options);
+            var result = JsonTasks.SanitizeCDataSections(input, options);
 
             // Assert
-            string expected = "{\"root\":{\"child\":[\"Value1\",\"Value2\"]}}";
+            var expected = "{\"root\":{\"child\":[\"Value1\",\"Value2\"]}}";
             Assert.AreEqual(expected, result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
         }
 
@@ -173,17 +173,17 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldHandleEmptyArray()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput
+            var input = new SanitizeCDataSectionsInput
             {
                 JsonData = new JArray()
             };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
-            SanitizeCDataSectionsResult result = JsonTasks.SanitizeCDataSections(input, options);
+            var result = JsonTasks.SanitizeCDataSections(input, options);
 
             // Assert
-            string expected = "[]";
+            var expected = "[]";
             Assert.AreEqual(expected, result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
         }
 
@@ -191,7 +191,7 @@ namespace Frends.Kungsbacka.Json.Tests
         public void SanitizeCDataSections_ShouldHandleMixedContent()
         {
             // Arrange
-            SanitizeCDataSectionsInput input = new SanitizeCDataSectionsInput
+            var input = new SanitizeCDataSectionsInput
             {
                 JsonData = new JObject
                 {
@@ -202,13 +202,13 @@ namespace Frends.Kungsbacka.Json.Tests
                     }
                 }
             };
-            SanitizeCDataSectionsOptions options = new SanitizeCDataSectionsOptions();
+            var options = new SanitizeCDataSectionsOptions();
 
             // Act
-            SanitizeCDataSectionsResult result = JsonTasks.SanitizeCDataSections(input, options);
+            var result = JsonTasks.SanitizeCDataSections(input, options);
 
             // Assert
-            string expected = "{\"name\":\"John\",\"data\":\"Nested value\"}";
+            var expected = "{\"name\":\"John\",\"data\":\"Nested value\"}";
             Assert.AreEqual(expected, result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
         }
     }
