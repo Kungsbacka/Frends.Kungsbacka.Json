@@ -29,6 +29,9 @@
 		},
 		{
 			"TaskMethod": "Frends.Kungsbacka.Json.JsonTasks.Map"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Json.JsonTasks.SanitizeCDataSections"
 		}
 	]
 }
