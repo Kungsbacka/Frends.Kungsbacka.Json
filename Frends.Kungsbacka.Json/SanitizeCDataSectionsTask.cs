@@ -2,8 +2,6 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Frends.Kungsbacka.Json
 {
@@ -19,7 +17,7 @@ namespace Frends.Kungsbacka.Json
         /// <param name="options">Optional parameters</param>
         /// <param name="cancellationToken"></param>
         /// <returns>JToken sanitized of #cdata-sections with data moved to parent JToken</returns>
-        public static async Task<SanitizeCDataSectionsResult> SanitizeCDataSections([PropertyTab] SanitizeCDataSectionsInput input, [PropertyTab] SanitizeCDataSectionsOptions options, CancellationToken cancellationToken)
+        public static SanitizeCDataSectionsResult SanitizeCDataSections([PropertyTab] SanitizeCDataSectionsInput input, [PropertyTab] SanitizeCDataSectionsOptions options)
         {
             if (input == null)
             {
