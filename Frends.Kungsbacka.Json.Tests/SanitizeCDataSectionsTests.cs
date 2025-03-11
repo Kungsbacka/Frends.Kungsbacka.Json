@@ -1,115 +1,171 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using NUnit.Framework;
-using System.Linq;
-using System.Threading;
+using System;
 
 namespace Frends.Kungsbacka.Json.Tests
 {
-	[TestFixture]
-	class SanitizeCDataSectionsTests
-	{
-		[Test]
-		public void AllDataMigratedToParentAndSectionsRemoved()
-		{
-			JToken jsonWithoutCdata = JToken.Parse(_jsonWithoutCdata);
-			var result = JsonTasks.SanitizeCDataSections(
-				new SanitizeCDataSectionsInput() { JsonData = JToken.Parse(_jsonWithCdata) },
-				new SanitizeCDataSectionsOptions(),
-				CancellationToken.None)
-				.GetAwaiter()
-				.GetResult();
-
-			Assert.True(JToken.DeepEquals(result.JsonData, jsonWithoutCdata));
-		}
-
-		[Test]
-		public void NoChangesMade()
-		{
-			JToken jsonData = JToken.Parse(_jsonWithoutCdata);
-			var result = JsonTasks.SanitizeCDataSections(
-				new SanitizeCDataSectionsInput() { JsonData = jsonData },
-				new SanitizeCDataSectionsOptions(),
-				CancellationToken.None)
-				.GetAwaiter()
-				.GetResult();
-
-			Assert.True(JToken.DeepEquals(result.JsonData, jsonData));
-		}
-
-
-		readonly string _jsonWithCdata = @"
+    [TestFixture]
+    public class SanitizeCDataSectionsTests
+    {
+        [Test]
+        public void SanitizeCDataSections_ShouldThrowArgumentNullException_WhenInputIsNull()
         {
-	        ""FlowInstance"": {
-		        ""@xmlns"": ""http://www.oeplatform.org/version/2.0/schemas/flowinstance"",
-		        ""@xmlns:xsi"": ""http://www.w3.org/2001/XMLSchema-instance"",
-		        ""@xsi:schemaLocation"": ""http://www.oeplatform.org/version/2.0/schemas/flowinstance schema-3793.xsd"",
-		        ""Header"": {
-			        ""Flow"": {
-				        ""FamilyID"": ""766"",
-				        ""Version"": ""6"",
-				        ""FlowID"": ""3793"",
-				        ""Name"": {
-					        ""#cdata-section"": ""TEST Ansöka om skolskjuts till grundskola läsåret 2024/2025""
-				        }
-			        },
-			        ""FlowInstanceID"": ""190456"",
-			        ""Status"": {
-				        ""ID"": ""21762"",
-				        ""Name"": {
-					        ""#cdata-section"": ""Inkommen""
-				        }
-			        }			       
-		        },
-		        ""Values"": {
-			        ""elev"": {
-				        ""QueryID"": ""144324"",
-				        ""Name"": {
-					        ""#cdata-section"": ""Vilken elev ansöker du om skolskjuts för?""
-				        },
-				        ""CitizenIdentifier"": ""20200307TEST"",
-				        ""Firstname"": ""Testbarn"",
-				        ""Lastname"": ""5år"",
-				        ""Address"": ""Testgatan 1"",
-				        ""Zipcode"": ""123 45"",
-				        ""PostalAddress"": ""Testköping""
-			        }
-		        }
-	        }
-        }";
+            // Arrange
+            SanitizeCDataSectionsInput input = null;
+            var options = new SanitizeCDataSectionsOptions();
 
-		readonly string _jsonWithoutCdata = @"
+            // Act
+            TestDelegate act = () => JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(act);
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldThrowArgumentNullException_WhenJsonDataIsNull()
         {
-		  ""FlowInstance"": {
-			""@xmlns"": ""http://www.oeplatform.org/version/2.0/schemas/flowinstance"",
-			""@xmlns:xsi"": ""http://www.w3.org/2001/XMLSchema-instance"",
-			""@xsi:schemaLocation"": ""http://www.oeplatform.org/version/2.0/schemas/flowinstance schema-3793.xsd"",
-			""Header"": {
-			  ""Flow"": {
-				""FamilyID"": ""766"",
-				""Version"": ""6"",
-				""FlowID"": ""3793"",
-				""Name"": ""TEST Ansöka om skolskjuts till grundskola läsåret 2024/2025""
-			  },
-			  ""FlowInstanceID"": ""190456"",
-			  ""Status"": {
-				""ID"": ""21762"",
-				""Name"": ""Inkommen""
-			  }
-			},
-			""Values"": {
-			  ""elev"": {
-				""QueryID"": ""144324"",
-				""Name"": ""Vilken elev ansöker du om skolskjuts för?"",
-				""CitizenIdentifier"": ""20200307TEST"",
-				""Firstname"": ""Testbarn"",
-				""Lastname"": ""5år"",
-				""Address"": ""Testgatan 1"",
-				""Zipcode"": ""123 45"",
-				""PostalAddress"": ""Testköping""
-			  }
-			}
-		  }
-		}";
-	}
+            // Arrange
+            var input = new SanitizeCDataSectionsInput { JsonData = null };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            TestDelegate act = () => JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(act);
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldReturnEmptyObject_WhenInputIsEmptyJsonObject()
+        {
+            // Arrange
+            var input = new SanitizeCDataSectionsInput { JsonData = JToken.Parse("{}") };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            var result = JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.AreEqual("{}", result.JsonData.ToString());
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldProcessSingleCDataSection()
+        {
+            // Arrange
+            var input = new SanitizeCDataSectionsInput
+            {
+                JsonData = JToken.Parse("{\"#cdata-section\":\"Some value\"}")
+            };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            var result = JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.AreEqual("\"Some value\"", result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldProcessNestedCDataSections()
+        {
+            // Arrange
+            var input = new SanitizeCDataSectionsInput
+            {
+                JsonData = JToken.Parse("{\"parent\":{\"#cdata-section\":\"Nested value\"}}")
+            };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            var result = JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.AreEqual("{\"parent\":\"Nested value\"}", result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldProcessArraysWithCDataSections()
+        {
+            // Arrange
+            var input = new SanitizeCDataSectionsInput
+            {
+                JsonData = JToken.Parse("[ {\"#cdata-section\":\"Value1\"}, {\"#cdata-section\":\"Value2\"} ]")
+            };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            var result = JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.AreEqual("[\"Value1\",\"Value2\"]", result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldLeaveRegularPropertiesUnchanged()
+        {
+            // Arrange
+            var input = new SanitizeCDataSectionsInput
+            {
+                JsonData = JToken.Parse("{\"name\":\"John\",\"#cdata-section\":\"Some value\"}")
+            };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            var result = JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.AreEqual("{\"name\":\"John\",\"#cdata-section\":\"Some value\"}", result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldHandleComplexNestedStructure()
+        {
+            // Arrange
+            var input = new SanitizeCDataSectionsInput
+            {
+                JsonData = JToken.Parse("{\"root\":{\"child\":[{\"#cdata-section\":\"Value1\"},{\"#cdata-section\":\"Value2\"}]}}")
+            };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            var result = JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.AreEqual("{\"root\":{\"child\":[\"Value1\",\"Value2\"]}}", result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldHandleEmptyArray()
+        {
+            // Arrange
+            var input = new SanitizeCDataSectionsInput
+            {
+                JsonData = JToken.Parse("[]")
+            };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            var result = JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.AreEqual("[]", result.JsonData.ToString());
+        }
+
+        [Test]
+        public void SanitizeCDataSections_ShouldHandleMixedContent()
+        {
+            // Arrange
+            var input = new SanitizeCDataSectionsInput
+            {
+                JsonData = JToken.Parse("{\"name\":\"John\",\"data\":{\"#cdata-section\":\"Nested value\"}}")
+            };
+            var options = new SanitizeCDataSectionsOptions();
+
+            // Act
+            var result = JsonTasks.SanitizeCDataSections(input, options);
+
+            // Assert
+            Assert.AreEqual("{\"name\":\"John\",\"data\":\"Nested value\"}", result.JsonData.ToString(Newtonsoft.Json.Formatting.None));
+        }
+    }
 }
