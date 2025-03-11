@@ -271,3 +271,10 @@ ConvertXmlStringToJToken does, but with a string. This is useful in scenarios wh
 know how the XML is encoded without looking at the XML declaration (when you get an HTTP
 content&#8209;type without charset for example). This way you skip the steps of figuring out the encoding and
 converting the XML to a string before passing it to the converter.
+
+### SanitizeCDataSections
+
+SanitizeCDataSections is a helper function that can be used to remove #cdata-section sections from a JToken.
+When converting from xml to json, #cdata-section sections are included in the json output. 
+The task takes a JToken as input and returns a JToken with all #cdata-section sections removed. This can be useful
+when you've converted an XML to JSON but want to be rid of the #cdata-section sections in the JSON.
